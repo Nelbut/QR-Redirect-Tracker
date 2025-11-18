@@ -12,6 +12,10 @@ LOG_FILE = "qr_scans.csv"
 # Logging function
 # -------------------------
 def log_scan(code_name, user_agent, ip):
+    """
+    Appends a scan to the CSV file.
+    Creates the file with headers if it doesn't exist.
+    """
     file_exists = os.path.isfile(LOG_FILE)
     with open(LOG_FILE, "a", newline="") as f:
         writer = csv.writer(f)
@@ -22,19 +26,23 @@ def log_scan(code_name, user_agent, ip):
 # -------------------------
 # Home route
 # -------------------------
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home():
-    return "QR redirect tracker is running!"
+    """
+    Main page - logs a 'direct' visit if someone types/copies the URL.
+    """
+    log_scan("direct_visit", request.headers.get("User-Agent"), request.remote_addr)
+    return "QR redirect tracker is running! Visit /qr1 or /qr2 for QR redirects."
 
 # -------------------------
 # QR redirect routes
 # -------------------------
-@app.route("/qr1")
+@app.route("/qr1", methods=["GET"])
 def qr1():
     log_scan("qr1", request.headers.get("User-Agent"), request.remote_addr)
     return redirect("https://www.focuscalisthenics.co.uk")  # Change if needed
 
-@app.route("/qr2")
+@app.route("/qr2", methods=["GET"])
 def qr2():
     log_scan("qr2", request.headers.get("User-Agent"), request.remote_addr)
     return redirect("https://www.focuscalisthenics.co.uk")  # Change if needed
@@ -42,7 +50,7 @@ def qr2():
 # -------------------------
 # Logs download route
 # -------------------------
-@app.route("/logs")
+@app.route("/logs", methods=["GET"])
 def logs():
     if os.path.exists(LOG_FILE):
         return send_file(LOG_FILE)
@@ -51,7 +59,7 @@ def logs():
 # -------------------------
 # Dashboard route
 # -------------------------
-@app.route("/dashboard")
+@app.route("/dashboard", methods=["GET"])
 def dashboard():
     if not os.path.exists(LOG_FILE):
         return "No scans yet."
@@ -62,10 +70,11 @@ def dashboard():
         for row in reader:
             counter[row["code"]] += 1
 
+    # Simple HTML table for display
     html = """
     <h1>QR Scan Dashboard</h1>
     <table border="1" cellpadding="5">
-      <tr><th>QR Code</th><th>Number of Scans</th></tr>
+      <tr><th>Code</th><th>Number of Scans</th></tr>
       {% for code, count in counts.items() %}
         <tr><td>{{ code }}</td><td>{{ count }}</td></tr>
       {% endfor %}
