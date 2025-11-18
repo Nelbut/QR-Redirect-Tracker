@@ -32,12 +32,12 @@ def home():
 @app.route("/qr1")
 def qr1():
     log_scan("qr1", request.headers.get("User-Agent"), request.remote_addr)
-    return redirect("https://www.focuscalisthenics.co.uk")
+    return redirect("https://www.focuscalisthenics.co.uk")  # Change if needed
 
 @app.route("/qr2")
 def qr2():
     log_scan("qr2", request.headers.get("User-Agent"), request.remote_addr)
-    return redirect("https://www.focuscalisthenics.co.uk")
+    return redirect("https://www.focuscalisthenics.co.uk")  # Change if needed
 
 # -------------------------
 # Logs download route
